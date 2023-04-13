@@ -1,24 +1,49 @@
+import responses
 import discord
 from discord.ext import commands
 
-botid = 'MTA5NTUxMjI5NDI3Mzg1MTUxMg.G_Sgl1.Z5b19vEB458Mn5LuaNhEIRVcjUPuJWRPQLxO-w'
-channelId = 1095512294273851512
 
-bot = commands.Bot(command_prefix ='!', intents=discord.Intents.all())
+listcsv = []
 
-#a
+with open("id's_tokens.txt","r") as f:
+        for row in f:
+              listcsv.append(row)
 
-# evento de criação do de comando do bot
-@bot.event
-async def on_ready():
-    print("Hello there, What's Your excuse now?")
-    # codigo que limita as respostas do bot a aquele id de canal de txt
-    channel = bot.get_channel(channelId)
-    await channel.send('Hello there . . . i am working')
+botid = listcsv[0].split(' = ')[1]
+channelId = listcsv[1].split(' = ')[1]
 
-@bot.command()
-async def add(ctx, x, y):
-    result = int(x) + int(y)
-    await ctx.send('Hello!')
+async def send_message(message, user_message, is_private):
+    try:
+        response = responses.get_response(user_message)
+        await message.author.send(response) if is_private else await message.channel.send(response)
 
-bot.run(botid)
+    except Exception as e:
+        print(e)
+
+def run_discord_bot():
+    TOKEN = botid
+    intents = discord.Intents.default()
+    intents.message_content = True
+    client = discord.Client(intents=intents)
+
+    @client.event
+    async def on_ready():
+        print (f'{client.user} is now running!')
+
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
+                 
+        username = str(message.author)
+        user_message = str(message.content)
+        channel = str(message.channel)
+
+        print(f'{username} said: "{user_message}" ({channel})')
+        if user_message[0] == '?':
+            user_message = user_message[1:]
+            await send_message(message, user_message, is_private=True)
+        else:
+            await send_message(message,user_message, is_private=False)
+
+    client.run(TOKEN)
