@@ -6,7 +6,7 @@ channelId = 1095512294273851512
 
 bot = commands.Bot(command_prefix ='!', intents=discord.Intents.all())
 
-
+#a
 
 # evento de criação do de comando do bot
 @bot.event
